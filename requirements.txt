@@ -5,3 +5,4 @@ tokenizers==0.21.1
 accelerate==0.27.0
 numpy==1.26.4
 pandas>=1.5.0
+psutil>=5.8.0
