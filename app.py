@@ -72,7 +72,11 @@ def display_result(result):
                 #name_ru = ERROR_NAMES_RU.get(e["type"], e["type"])
                 #st.write(f"- {name_ru}: {e['probability']*100:.1f}% (порог {ERROR_THRESHOLDS[e['type']]*100:.0f}%)")
 
-    st.metric("📊 Disagreement", f"{result['disagreement']:.3f}")
+    st.metric(
+    "📊 Disagreement", 
+    f"{result['disagreement']:.3f}",
+    help="Показывает согласованность модели. Чем ближе к 0, тем увереннее анализ."
+    )
 
 # ============================================================
 # Режим 1: Одиночный ввод
