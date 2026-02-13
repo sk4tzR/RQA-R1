@@ -13,7 +13,6 @@ import torch
 from utils import (
     RQAJudge,
     load_texts_from_uploaded_file,
-    format_result_for_streamlit,
     ERROR_NAMES_RU,
     ERROR_THRESHOLDS
 )
@@ -31,14 +30,14 @@ def get_memory_usage():
     memory_percent = (memory_mb / 1024) * 100
     return memory_percent, memory_mb
 
-def check_memory_and_cleanup(threshold=85):
+def auto_cleanup_if_needed(threshold=85):
     """
-    Проверяет использование памяти и принудительно очищает кэш,
-    если превышен порог (по умолчанию 85%)
+    Автоматически очищает кэш, если использование памяти превышает порог.
+    Возвращает True, если была выполнена очистка.
     """
     memory_percent, memory_mb = get_memory_usage()
     
-    # Сохраняем в session_state для отладки
+    # Сохраняем метрики в session_state для отладки (опционально)
     st.session_state['last_memory_check'] = {
         'percent': memory_percent,
         'mb': memory_mb,
@@ -46,22 +45,17 @@ def check_memory_and_cleanup(threshold=85):
     }
     
     if memory_percent > threshold:
-        st.warning(f"⚠️ Использование памяти: {memory_percent:.1f}% ({memory_mb:.0f} MB). Очищаю кэш...")
-        
-        # Очищаем кэш модели
+        # Тихая очистка без уведомления пользователя
         if 'judge' in st.session_state:
             del st.session_state['judge']
         
-        # Принудительная сборка мусора
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
         
-        # Сбрасываем флаг загрузки
         st.cache_resource.clear()
         st.session_state['model_loaded'] = False
         
-        st.success("✅ Кэш очищен. Перезапустите анализ.")
         return True
     return False
 
@@ -119,18 +113,6 @@ with st.sidebar:
     else:
         st.progress(int(memory_percent) / 100, text="🔴 Критично")
     
-    # Кнопка ручной очистки
-    if st.button("🧹 Очистить кэш сейчас"):
-        st.cache_resource.clear()
-        if 'judge' in st.session_state:
-            del st.session_state['judge']
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        st.session_state['model_loaded'] = False
-        st.success("✅ Кэш очищен!")
-        st.rerun()
-    
     st.markdown("---")
     
     # Режимы работы
@@ -142,6 +124,9 @@ with st.sidebar:
 # ============================================================
 # Загрузка модели (только если память позволяет)
 # ============================================================
+
+# Проверяем память и при необходимости очищаем перед загрузкой
+auto_cleanup_if_needed(threshold=85)
 
 if memory_percent < 90:
     if not st.session_state['model_loaded']:
@@ -161,15 +146,9 @@ else:
 
 def safe_infer(judge, text):
     """Безопасный инференс с проверкой памяти"""
-    memory_percent, _ = get_memory_usage()
-    
-    if memory_percent > 85:
-        st.warning("⚠️ Высокое использование памяти. Очищаю кэш...")
-        st.cache_resource.clear()
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        # Перезагружаем модель
+    # Проверяем память и при необходимости очищаем
+    if auto_cleanup_if_needed(threshold=85):
+        # Если была очистка, перезагружаем модель
         judge = load_judge()
     
     return judge.infer(text)
@@ -197,14 +176,6 @@ def display_result(result):
         st.subheader("❌ Явные логические ошибки:")
         for name, prob in result['explicit_errors']:
             st.error(f"**{ERROR_NAMES_RU[name]}** — {prob*100:.1f}%")
-
-    # Ошибки ниже порога (закомментировано, но можно включить)
-    # below = [e for e in result["top_errors"] if not e["above_threshold"] and e["probability"] > 0.01]
-    # if below:
-    #     with st.expander("📉 Ошибки ниже порога уверенности"):
-    #         for e in below:
-    #             name_ru = ERROR_NAMES_RU.get(e["type"], e["type"])
-    #             st.write(f"- {name_ru}: {e['probability']*100:.1f}% (порог {ERROR_THRESHOLDS[e['type']]*100:.0f}%)")
 
     st.metric(
         "📊 Disagreement", 
