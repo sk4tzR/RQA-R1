@@ -6,7 +6,13 @@ import streamlit as st
 import pandas as pd
 import json
 import time
-from utils import RQAJudge, load_texts_from_uploaded_file, format_result_for_streamlit, ERROR_NAMES_RU
+from utils import (
+    RQAJudge, 
+    load_texts_from_uploaded_file, 
+    format_result_for_streamlit, 
+    ERROR_NAMES_RU,
+    ERROR_THRESHOLDS  # 👈 добавить эту строку
+)
 
 # Настройка страницы
 st.set_page_config(
