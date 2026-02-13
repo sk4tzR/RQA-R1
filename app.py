@@ -107,11 +107,11 @@ with st.sidebar:
     
     # Прогресс-бар памяти
     if memory_percent < 70:
-        st.progress(int(memory_percent), text="✅ Норма")  # Убираем деление на 100
+        st.progress(memory_percent / 100, text="✅ Норма")
     elif memory_percent < 85:
-        st.progress(int(memory_percent), text="⚠️ Средне")  # Убираем деление на 100
+        st.progress(memory_percent / 100, text="⚠️ Средне")
     else:
-        st.progress(int(memory_percent), text="🔴 Критично")  # Убираем деление на 100
+        st.progress(memory_percent / 100, text="🔴 Критично")
     
     st.markdown("---")
     
