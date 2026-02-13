@@ -1,19 +1,3 @@
----
-license: mit
-base_model:
-  - FacebookAI/xlm-roberta-large
-language:
-  - ru
-tags:
-  - Reasoning
-  - Logical-Analysis
-  - Text-Classification
-  - AI-Safety
-  - Evaluation
-  - Judge-model
-  - Argumentation
----
-
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-model-blue)](https://huggingface.co/skatzR/RQA-X1.1)
 
 # 🧠 RQA — Reasoning Quality Analyzer (R1)
