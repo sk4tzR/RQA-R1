@@ -65,12 +65,12 @@ def display_result(result):
         for name, prob in result['explicit_errors']:
             st.error(f"**{ERROR_NAMES_RU[name]}** — {prob*100:.1f}%")
 
-    below = [e for e in result["top_errors"] if not e["above_threshold"] and e["probability"] > 0.01]
-    if below:
-        with st.expander("📉 Ошибки ниже порога уверенности"):
-            for e in below:
-                name_ru = ERROR_NAMES_RU.get(e["type"], e["type"])
-                st.write(f"- {name_ru}: {e['probability']*100:.1f}% (порог {ERROR_THRESHOLDS[e['type']]*100:.0f}%)")
+    #below = [e for e in result["top_errors"] if not e["above_threshold"] and e["probability"] > 0.01]
+    #if below:
+        #with st.expander("📉 Ошибки ниже порога уверенности"):
+            #for e in below:
+                #name_ru = ERROR_NAMES_RU.get(e["type"], e["type"])
+                #st.write(f"- {name_ru}: {e['probability']*100:.1f}% (порог {ERROR_THRESHOLDS[e['type']]*100:.0f}%)")
 
     st.metric("📊 Disagreement", f"{result['disagreement']:.3f}")
 
