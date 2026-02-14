@@ -121,9 +121,9 @@ def auto_cleanup_if_needed(force=False):
         need_cleanup = True
         reasons.append(f"прошло {int(time_since_last)} сек")
 
-    if percent > 85:
+    if percent > 98:
         need_cleanup = True
-        reasons.append(f"память {percent:.1f}% > 85%")
+        reasons.append(f"память {percent:.1f}% > 98%")
 
     if force:
         need_cleanup = True
